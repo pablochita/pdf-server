@@ -4,10 +4,9 @@ const cors = require('cors');
 
 const app = express();
 
-// CORS Fix (Neocities se request aane ke liye)
+// CORS Fix (Website se request block na ho)
 app.use(cors());
-app.options('*', cors()); 
-
+app.options('*', cors());
 app.use(express.json({ limit: '50mb' }));
 
 app.post('/api/generate-pdf', async (req, res) => {
@@ -18,12 +17,16 @@ app.post('/api/generate-pdf', async (req, res) => {
     }
 
     try {
+        // Render ke liye Chrome settings
         const browser = await puppeteer.launch({
             headless: "new",
+            executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,
             args: [
                 '--no-sandbox', 
                 '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage' // Render ki RAM crash se bachane ke liye
+                '--disable-dev-shm-usage',
+                '--single-process', // Render ki 512MB RAM mein crash bachane ke liye
+                '--no-zygote'
             ]
         });
         
@@ -32,7 +35,7 @@ app.post('/api/generate-pdf', async (req, res) => {
 
         const pdfBuffer = await page.pdf({
             format: 'A4',
-            printBackground: true,
+            printBackground: true, // Taaki Google Docs ke colors aayein
             margin: {
                 top: '20px',
                 right: '20px',

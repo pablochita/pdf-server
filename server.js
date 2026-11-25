@@ -4,7 +4,10 @@ const cors = require('cors');
 
 const app = express();
 
+// CORS Fix (Neocities se request aane ke liye)
 app.use(cors());
+app.options('*', cors()); 
+
 app.use(express.json({ limit: '50mb' }));
 
 app.post('/api/generate-pdf', async (req, res) => {
@@ -17,7 +20,11 @@ app.post('/api/generate-pdf', async (req, res) => {
     try {
         const browser = await puppeteer.launch({
             headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
+            args: [
+                '--no-sandbox', 
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage' // Render ki RAM crash se bachane ke liye
+            ]
         });
         
         const page = await browser.newPage();
